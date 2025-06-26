@@ -1,3 +1,8 @@
+# ayun changes
+Commented out a lot of stuff from the root-level init.lua since trying to get pylsp to work with that was kind of difficult.
+Put Mason and all the lsp stuff in its own directory in custom/plugins.
+
+
 # kickstart.nvim
 
 ## Introduction
