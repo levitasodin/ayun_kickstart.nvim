@@ -102,13 +102,50 @@ return {
             pycodestyle = {
               enabled = true,
               ignore = { 'E305' },
-              maxLineLength = 120,
+              maxLineLength = 150,
             },
             pyflakes = { disabled = true },
             flake8 = { disabled = true },
 
             -- jedi autocompletion
             jedi_completion = { fuzzy = true },
+          },
+        },
+      },
+    }
+
+    -- configure robot framework server
+    local cwd = vim.fn.getcwd()
+    OPERATING_SYSTEM = vim.loop.os_uname().sysname
+    if OPERATING_SYSTEM == 'Windows_NT' then
+      PYTHONPATH =
+        { 'C:\\Users\\ayun\\zaya_app\\testrail\\robot', 'C:\\Users\\ayun\\zaya_app\\testrail\\robot\\resources', 'C:\\Users\\ayun\\zaya_app\\testrail' }
+    else
+      PYTHONPATH = { '~/zaya_app/testrail/robot', '~/zaya_app/testrail/robot/resources', '~/zaya_app/testrail' }
+    end
+    if OPERATING_SYSTEM == 'Windows_NT' then
+      EXECUTABLE_PATH = 'C:\\Users\\ayun\\zaya_app\\.venv\\Scripts\\python.exe'
+    else
+      EXECUTABLE_PATH = '~/zaya_app/.venv/bin/python'
+    end
+
+    lspconfig['robotframework_ls'].setup {
+      capabilities = capabilities,
+      on_attach = on_attach,
+      root_dir = function(_)
+        local cwd = vim.fn.getcwd()
+        local robot_root = cwd .. '/robot'
+        if vim.fn.isdirectory(robot_root) == 1 then
+          return robot_root
+        end
+        return cwd
+      end,
+      settings = {
+        robot = {
+          -- pythonpath = PYTHONPATH,
+          pythonpath = {
+            vim.fn.getcwd() .. '/robot',
+            vim.fn.getcwd() .. '/robot/resources',
           },
         },
       },
