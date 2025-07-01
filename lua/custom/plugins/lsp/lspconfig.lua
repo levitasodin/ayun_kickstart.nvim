@@ -8,6 +8,7 @@ return {
   config = function()
     -- import lspconfig plugin
     local lspconfig = require 'lspconfig'
+    local util = require 'lspconfig.util'
 
     -- load autocompletion source (nvim-cmp)
     local cmp_nvim_lsp = require 'cmp_nvim_lsp'
@@ -16,6 +17,7 @@ return {
 
     local opts = { noremap = true, silent = true }
     local on_attach = function(client, bufnr)
+      print('>> LSP attached:', client.name, 'to buffer', bufnr)
       opts.buffer = bufnr
 
       -- set keybinds
@@ -85,14 +87,23 @@ return {
     -- end
     -- =====================================================================
 
+    local data_path = vim.fn.stdpath 'data'
+    local pylsp_path = data_path .. '/mason/packages/python-lsp-server/venv/Scripts/pylsp.exe'
+    local lua_path = data_path .. '/mason/packages/lua-language-server/bin/lua-language-server.exe'
+
     -- configure lua server
     lspconfig['lua_ls'].setup {
+      -- cmd = { lua_path },
+      cmd = { 'lua-language-server' },
+      root_dir = util.root_pattern('.git', '.luarc.json', 'init.lua'),
       capabilities = capabilities,
       on_attach = on_attach,
     }
 
     -- conrfigure python server
     lspconfig['pylsp'].setup {
+      -- cmd = { pylsp_path },
+      cmd = { 'pylsp' },
       capabilities = capabilities,
       on_attach = on_attach,
       settings = {
@@ -116,7 +127,9 @@ return {
 
     -- configure robot framework server
     local cwd = vim.fn.getcwd()
-    OPERATING_SYSTEM = vim.loop.os_uname().sysname
+    local os_name = jit.os
+    -- OPERATING_SYSTEM = vim.loop.os_uname().sysname
+    OPERATING_SYSTEM = os_name
     if OPERATING_SYSTEM == 'Windows_NT' then
       PYTHONPATH =
         { 'C:\\Users\\ayun\\zaya_app\\testrail\\robot', 'C:\\Users\\ayun\\zaya_app\\testrail\\robot\\resources', 'C:\\Users\\ayun\\zaya_app\\testrail' }
@@ -132,8 +145,8 @@ return {
     lspconfig['robotframework_ls'].setup {
       capabilities = capabilities,
       on_attach = on_attach,
+      filetypes = { 'robot', 'resource' },
       root_dir = function(_)
-        local cwd = vim.fn.getcwd()
         local robot_root = cwd .. '/robot'
         if vim.fn.isdirectory(robot_root) == 1 then
           return robot_root
